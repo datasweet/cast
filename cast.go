@@ -63,30 +63,12 @@ func AsString(v interface{}) (string, bool) {
 	switch d := v.(type) {
 	case string:
 		return d, true
-	case int:
-		return strconv.FormatInt(int64(d), 10), true
-	case int8:
-		return strconv.FormatInt(int64(d), 10), true
-	case int16:
-		return strconv.FormatInt(int64(d), 10), true
-	case int32:
-		return strconv.FormatInt(int64(d), 10), true
-	case int64:
-		return strconv.FormatInt(d, 10), true
-	case uint:
-		return strconv.FormatUint(uint64(d), 10), true
-	case uint8:
-		return strconv.FormatUint(uint64(d), 10), true
-	case uint16:
-		return strconv.FormatUint(uint64(d), 10), true
-	case uint32:
-		return strconv.FormatUint(uint64(d), 10), true
-	case uint64:
-		return strconv.FormatUint(uint64(d), 10), true
-	case float32:
-		return strconv.FormatFloat(float64(d), 'f', -1, 32), true
-	case float64:
-		return strconv.FormatFloat(d, 'f', -1, 64), true
+	case int, int8, int16, int32, int64:
+		return strconv.FormatInt(reflect.ValueOf(d).Int(), 10), true
+	case float32, float64:
+		return strconv.FormatFloat(reflect.ValueOf(d).Float(), 'f', 2, 64), true
+	case uint, uint8, uint16, uint32, uint64:
+		return strconv.FormatUint(reflect.ValueOf(d).Uint(), 10), true
 	case json.Number:
 		return d.String(), true
 	case bool:
@@ -205,10 +187,8 @@ func AsDatetime(v interface{}) (time.Time, bool) {
 	switch d := v.(type) {
 	case time.Time:
 		return d.UTC(), true
-	case int: // timestamp compliant with javascript
-		return time.Unix(0, int64(d)*int64(time.Millisecond)).UTC(), true
-	case int64:
-		return time.Unix(0, d*int64(time.Millisecond)).UTC(), true
+	case int, int32, int64: // timestamp compliant with javascript
+		return time.Unix(0, reflect.ValueOf(d).Int()*int64(time.Millisecond)).UTC(), true
 	case string:
 		// Try formats
 		for _, format := range DateFormats {

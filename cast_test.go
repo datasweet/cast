@@ -51,8 +51,8 @@ func TestAsString(t *testing.T) {
 	testString(t, uint16(123), "123", true)
 	testString(t, uint32(123), "123", true)
 	testString(t, uint64(123), "123", true)
-	testString(t, float32(3.14), "3.14", true)
-	testString(t, float64(3.14), "3.14", true)
+	testString(t, float32(3.14501), "3.15", true)
+	testString(t, float64(3.14501), "3.15", true)
 	testString(t, true, "true", true)
 }
 
