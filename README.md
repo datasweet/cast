@@ -14,8 +14,8 @@ go get github.com/datasweet/cast
 
 ## Usage
 
-### Parsing a new json
-```
+### Casting to a time.Time
+```go
 import (
   "fmt"
   "github.com/datasweet/cast"
