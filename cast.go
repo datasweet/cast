@@ -66,7 +66,7 @@ func AsString(v interface{}) (string, bool) {
 	case int, int8, int16, int32, int64:
 		return strconv.FormatInt(reflect.ValueOf(d).Int(), 10), true
 	case float32, float64:
-		return strconv.FormatFloat(reflect.ValueOf(d).Float(), 'f', 2, 64), true
+		return strconv.FormatFloat(reflect.ValueOf(d).Float(), 'f', -1, 64), true
 	case uint, uint8, uint16, uint32, uint64:
 		return strconv.FormatUint(reflect.ValueOf(d).Uint(), 10), true
 	case json.Number:
