@@ -154,7 +154,7 @@ func TestAsDatetimeArray(t *testing.T) {
 
 	arr, ok = cast.AsDatetimeArray(1551435220270, "01/03/2019", "20190301101340", "wrong")
 	assert.False(t, ok)
-	assert.Equal(t, []time.Time{timestamp, date, datetime, time.Time{}}, arr)
+	assert.Equal(t, []time.Time{timestamp, date, datetime, {}}, arr)
 }
 
 func testBool(t *testing.T, value interface{}, expected bool, ok bool) {
