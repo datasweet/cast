@@ -3,6 +3,7 @@ package cast
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -25,30 +26,12 @@ func AsBool(v interface{}) (bool, bool) {
 	switch d := v.(type) {
 	case bool:
 		return d, true
-	case int:
-		return d > 0, true
-	case int8:
-		return d > 0, true
-	case int16:
-		return d > 0, true
-	case int32:
-		return d > 0, true
-	case int64:
-		return d > 0, true
-	case uint:
-		return d > 0, true
-	case uint8:
-		return d > 0, true
-	case uint16:
-		return d > 0, true
-	case uint32:
-		return d > 0, true
-	case uint64:
-		return d > 0, true
-	case float32:
-		return d > 0, true
-	case float64:
-		return d > 0, true
+	case int, int8, int16, int32, int64:
+		return reflect.ValueOf(d).Int() > 0, true
+	case uint, uint8, uint16, uint32, uint64:
+		return reflect.ValueOf(d).Uint() > 0, true
+	case float32, float64:
+		return reflect.ValueOf(d).Float() > 0, true
 	case string:
 		if b, err := strconv.ParseBool(d); err == nil {
 			return b, true
@@ -134,30 +117,12 @@ func AsStringArray(values ...interface{}) ([]string, bool) {
 // AsInt to convert as a int
 func AsInt(v interface{}) (int64, bool) {
 	switch d := v.(type) {
-	case int:
-		return int64(d), true
-	case int8:
-		return int64(d), true
-	case int16:
-		return int64(d), true
-	case int32:
-		return int64(d), true
-	case int64:
-		return d, true
-	case float32:
-		return int64(d), true
-	case float64:
-		return int64(d), true
-	case uint:
-		return int64(d), true
-	case uint8:
-		return int64(d), true
-	case uint16:
-		return int64(d), true
-	case uint32:
-		return int64(d), true
-	case uint64:
-		return int64(d), true
+	case int, int8, int16, int32, int64:
+		return reflect.ValueOf(d).Int(), true
+	case float32, float64:
+		return int64(reflect.ValueOf(d).Float()), true
+	case uint, uint8, uint16, uint32, uint64:
+		return int64(reflect.ValueOf(d).Uint()), true
 	case json.Number:
 		if f, err := d.Int64(); err == nil {
 			return f, true
@@ -195,30 +160,12 @@ func AsIntArray(values ...interface{}) ([]int64, bool) {
 // AsFloat to convert as a float64
 func AsFloat(v interface{}) (float64, bool) {
 	switch d := v.(type) {
-	case float64:
-		return d, true
-	case float32:
-		return float64(d), true
-	case int:
-		return float64(d), true
-	case int8:
-		return float64(d), true
-	case int16:
-		return float64(d), true
-	case int32:
-		return float64(d), true
-	case int64:
-		return float64(d), true
-	case uint:
-		return float64(d), true
-	case uint8:
-		return float64(d), true
-	case uint16:
-		return float64(d), true
-	case uint32:
-		return float64(d), true
-	case uint64:
-		return float64(d), true
+	case float32, float64:
+		return reflect.ValueOf(d).Float(), true
+	case int, int8, int16, int32, int64:
+		return float64(reflect.ValueOf(d).Int()), true
+	case uint, uint8, uint16, uint32, uint64:
+		return float64(reflect.ValueOf(d).Uint()), true
 	case json.Number:
 		if f, err := d.Float64(); err == nil {
 			return f, true
