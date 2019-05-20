@@ -157,6 +157,27 @@ func TestAsDatetimeArray(t *testing.T) {
 	assert.Equal(t, []time.Time{timestamp, date, datetime, {}}, arr)
 }
 
+func TestAsDuration(t *testing.T) {
+	duration := time.Second * 10
+
+	testDuration(t, duration, duration, true)
+	testDuration(t, 10000000000, duration, true)
+	testDuration(t, "10s", duration, true)
+	testDuration(t, "wrong", time.Duration(0), false)
+}
+
+func TestAsDurationArray(t *testing.T) {
+	duration := time.Second * 10
+
+	arr, ok := cast.AsDurationArray(duration, 10000000000, "10s")
+	assert.True(t, ok)
+	assert.Equal(t, []time.Duration{duration, duration, duration}, arr)
+
+	arr, ok = cast.AsDurationArray(duration, 10000000000, "10s", "wrong")
+	assert.False(t, ok)
+	assert.Equal(t, []time.Duration{duration, duration, duration, time.Duration(0)}, arr)
+}
+
 func testBool(t *testing.T, value interface{}, expected bool, ok bool) {
 	b, o := cast.AsBool(value)
 	assert.Equal(t, expected, b)
@@ -183,6 +204,12 @@ func testFloat(t *testing.T, value interface{}, expected float64, ok bool) {
 
 func testDatetime(t *testing.T, value interface{}, expected time.Time, ok bool) {
 	b, o := cast.AsDatetime(value)
+	assert.Equal(t, expected, b)
+	assert.Equal(t, ok, o)
+}
+
+func testDuration(t *testing.T, value interface{}, expected time.Duration, ok bool) {
+	b, o := cast.AsDuration(value)
 	assert.Equal(t, expected, b)
 	assert.Equal(t, ok, o)
 }

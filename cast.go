@@ -221,3 +221,36 @@ func AsDatetimeArray(values ...interface{}) ([]time.Time, bool) {
 	}
 	return arr, b
 }
+
+// AsDuration to convert as a duration
+func AsDuration(v interface{}) (time.Duration, bool) {
+	switch d := v.(type) {
+	case time.Duration:
+		return d, true
+	case int, int8, int16, int32, int64:
+		return time.Duration(reflect.ValueOf(d).Int()), true
+	case float32, float64:
+		return time.Duration(int64(reflect.ValueOf(d).Float())), true
+	case string:
+		if du, err := time.ParseDuration(d); err == nil {
+			return du, true
+		}
+		return time.Duration(0), false
+	default:
+		return time.Duration(0), false
+	}
+}
+
+// AsDurationArray to convert as an array of duration
+func AsDurationArray(values ...interface{}) ([]time.Duration, bool) {
+	arr := make([]time.Duration, len(values))
+	b := true
+	for i, v := range values {
+		if cv, ok := AsDuration(v); ok {
+			arr[i] = cv
+			continue
+		}
+		b = false
+	}
+	return arr, b
+}
