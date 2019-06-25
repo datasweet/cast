@@ -139,6 +139,57 @@ func AsIntArray(values ...interface{}) ([]int64, bool) {
 	return arr, b
 }
 
+// AsUInt to convert as a uint64
+func AsUInt(v interface{}) (uint64, bool) {
+	switch d := v.(type) {
+	case int, int8, int16, int32, int64:
+		n := reflect.ValueOf(d).Int()
+		if n < 0 {
+			return 0, false
+		}
+		return uint64(n), true
+	case float32, float64:
+		n := reflect.ValueOf(d).Float()
+		if n < 0 {
+			return 0, false
+		}
+		return uint64(n), true
+	case uint, uint8, uint16, uint32, uint64:
+		return reflect.ValueOf(d).Uint(), true
+	case json.Number:
+		if n, err := d.Int64(); err == nil && n >= 0 {
+			return uint64(n), true
+		}
+		return 0, false
+	case string:
+		if i, err := strconv.ParseUint(d, 10, 64); err == nil {
+			return i, true
+		}
+		return 0, false
+	case bool:
+		if d {
+			return 1, true
+		}
+		return 0, true
+	default:
+		return 0, false
+	}
+}
+
+// AsUIntArray to convert as an array of uint64
+func AsUIntArray(values ...interface{}) ([]uint64, bool) {
+	arr := make([]uint64, len(values))
+	b := true
+	for i, v := range values {
+		if cv, ok := AsUInt(v); ok {
+			arr[i] = cv
+			continue
+		}
+		b = false
+	}
+	return arr, b
+}
+
 // AsFloat to convert as a float64
 func AsFloat(v interface{}) (float64, bool) {
 	switch d := v.(type) {
