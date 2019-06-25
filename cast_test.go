@@ -85,40 +85,40 @@ func TestAsInt(t *testing.T) {
 	testInt(t, float64(123), 123, true)
 }
 
-func TestAsUIntArray(t *testing.T) {
-	arr, ok := cast.AsUIntArray(1, 2, true)
+func TestAsUintArray(t *testing.T) {
+	arr, ok := cast.AsUintArray(1, 2, true)
 	assert.True(t, ok)
 	assert.Equal(t, []uint64{1, 2, 1}, arr)
 
-	arr, ok = cast.AsUIntArray(1, 2, true, "no", -2)
+	arr, ok = cast.AsUintArray(1, 2, true, "no", -2)
 	assert.False(t, ok)
 	assert.Equal(t, []uint64{1, 2, 1, 0, 0}, arr)
 }
 
-func TestAsUInt(t *testing.T) {
-	testUInt(t, "123", 123, true)
-	testUInt(t, "-123", 0, false)
-	testUInt(t, "wrong", 0, false)
-	testUInt(t, true, 1, true)
-	testUInt(t, false, 0, true)
-	testUInt(t, 123, 123, true)
-	testUInt(t, int8(123), 123, true)
-	testUInt(t, int8(-123), 0, false)
-	testUInt(t, int16(123), 123, true)
-	testUInt(t, int16(-123), 0, false)
-	testUInt(t, int32(123), 123, true)
-	testUInt(t, int32(-123), 0, false)
-	testUInt(t, int64(123), 123, true)
-	testUInt(t, int64(-123), 0, false)
-	testUInt(t, uint(123), 123, true)
-	testUInt(t, uint8(123), 123, true)
-	testUInt(t, uint16(123), 123, true)
-	testUInt(t, uint32(123), 123, true)
-	testUInt(t, uint64(123), 123, true)
-	testUInt(t, float32(123), 123, true)
-	testUInt(t, float32(-123), 0, false)
-	testUInt(t, float64(123), 123, true)
-	testUInt(t, float64(-123), 0, false)
+func TestAsUint(t *testing.T) {
+	testUint(t, "123", 123, true)
+	testUint(t, "-123", 0, false)
+	testUint(t, "wrong", 0, false)
+	testUint(t, true, 1, true)
+	testUint(t, false, 0, true)
+	testUint(t, 123, 123, true)
+	testUint(t, int8(123), 123, true)
+	testUint(t, int8(-123), 0, false)
+	testUint(t, int16(123), 123, true)
+	testUint(t, int16(-123), 0, false)
+	testUint(t, int32(123), 123, true)
+	testUint(t, int32(-123), 0, false)
+	testUint(t, int64(123), 123, true)
+	testUint(t, int64(-123), 0, false)
+	testUint(t, uint(123), 123, true)
+	testUint(t, uint8(123), 123, true)
+	testUint(t, uint16(123), 123, true)
+	testUint(t, uint32(123), 123, true)
+	testUint(t, uint64(123), 123, true)
+	testUint(t, float32(123), 123, true)
+	testUint(t, float32(-123), 0, false)
+	testUint(t, float64(123), 123, true)
+	testUint(t, float64(-123), 0, false)
 }
 
 func TestAsIntArray(t *testing.T) {
@@ -232,8 +232,8 @@ func testInt(t *testing.T, value interface{}, expected int64, ok bool) {
 	assert.Equal(t, ok, o)
 }
 
-func testUInt(t *testing.T, value interface{}, expected uint64, ok bool) {
-	b, o := cast.AsUInt(value)
+func testUint(t *testing.T, value interface{}, expected uint64, ok bool) {
+	b, o := cast.AsUint(value)
 	assert.Equal(t, expected, b)
 	assert.Equal(t, ok, o)
 }

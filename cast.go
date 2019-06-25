@@ -1,7 +1,6 @@
 package cast
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -21,27 +20,37 @@ var (
 	}
 )
 
+func valueOf(v interface{}) reflect.Value {
+	if v == nil {
+		return reflect.Value{}
+	}
+	rv := reflect.ValueOf(v)
+	if rv.Kind() != reflect.Ptr {
+		return rv
+	}
+	return rv.Elem()
+}
+
 // AsBool to convert as bool
 func AsBool(v interface{}) (bool, bool) {
-	switch d := v.(type) {
-	case bool:
-		return d, true
-	case int, int8, int16, int32, int64:
-		return reflect.ValueOf(d).Int() > 0, true
-	case uint, uint8, uint16, uint32, uint64:
-		return reflect.ValueOf(d).Uint() > 0, true
-	case float32, float64:
-		return reflect.ValueOf(d).Float() > 0, true
-	case string:
-		if b, err := strconv.ParseBool(d); err == nil {
+	rv := valueOf(v)
+	switch rv.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return rv.Int() > 0, true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return rv.Uint() > 0, true
+	case reflect.Float32, reflect.Float64:
+		return rv.Float() > 0, true
+	case reflect.String:
+		if b, err := strconv.ParseBool(rv.String()); err == nil {
 			return b, true
 		}
 		return false, false
-
+	case reflect.Bool:
+		return rv.Bool(), true
 	default:
 		return false, false
 	}
-
 }
 
 // AsBoolArray to convert as an array of bool
@@ -60,24 +69,21 @@ func AsBoolArray(values ...interface{}) ([]bool, bool) {
 
 // AsString to convert as string
 func AsString(v interface{}) (string, bool) {
-	switch d := v.(type) {
-	case string:
-		return d, true
-	case int, int8, int16, int32, int64:
-		return strconv.FormatInt(reflect.ValueOf(d).Int(), 10), true
-	case float32, float64:
-		return strconv.FormatFloat(reflect.ValueOf(d).Float(), 'f', -1, 64), true
-	case uint, uint8, uint16, uint32, uint64:
-		return strconv.FormatUint(reflect.ValueOf(d).Uint(), 10), true
-	case json.Number:
-		return d.String(), true
-	case bool:
-		return strconv.FormatBool(d), true
+	rv := valueOf(v)
+	switch rv.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(rv.Int(), 10), true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return strconv.FormatUint(rv.Uint(), 10), true
+	case reflect.Float32, reflect.Float64:
+		return strconv.FormatFloat(rv.Float(), 'f', -1, 64), true
+	case reflect.String:
+		return rv.String(), true
+	case reflect.Bool:
+		return strconv.FormatBool(rv.Bool()), true
+	case reflect.Invalid:
+		return "", false
 	default:
-		if v == nil {
-			return "", false
-		}
-
 		return fmt.Sprintf("%v", v), false
 	}
 }
@@ -98,25 +104,22 @@ func AsStringArray(values ...interface{}) ([]string, bool) {
 
 // AsInt to convert as a int
 func AsInt(v interface{}) (int64, bool) {
-	switch d := v.(type) {
-	case int, int8, int16, int32, int64:
-		return reflect.ValueOf(d).Int(), true
-	case float32, float64:
-		return int64(reflect.ValueOf(d).Float()), true
-	case uint, uint8, uint16, uint32, uint64:
-		return int64(reflect.ValueOf(d).Uint()), true
-	case json.Number:
-		if f, err := d.Int64(); err == nil {
-			return f, true
+	rv := valueOf(v)
+
+	switch rv.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return rv.Int(), true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return int64(rv.Uint()), true
+	case reflect.Float32, reflect.Float64:
+		return int64(rv.Float()), true
+	case reflect.String:
+		if n, err := strconv.ParseInt(rv.String(), 10, 64); err == nil {
+			return n, true
 		}
 		return 0, false
-	case string:
-		if i, err := strconv.ParseInt(d, 10, 64); err == nil {
-			return i, true
-		}
-		return 0, false
-	case bool:
-		if d {
+	case reflect.Bool:
+		if n := rv.Bool(); n {
 			return 1, true
 		}
 		return 0, true
@@ -139,49 +142,52 @@ func AsIntArray(values ...interface{}) ([]int64, bool) {
 	return arr, b
 }
 
-// AsUInt to convert as a uint64
-func AsUInt(v interface{}) (uint64, bool) {
-	switch d := v.(type) {
-	case int, int8, int16, int32, int64:
-		n := reflect.ValueOf(d).Int()
+// AsUint to convert as a uint64
+func AsUint(v interface{}) (uint64, bool) {
+	rv := valueOf(v)
+
+	switch kind := rv.Kind(); kind {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		n := rv.Int()
 		if n < 0 {
 			return 0, false
 		}
 		return uint64(n), true
-	case float32, float64:
-		n := reflect.ValueOf(d).Float()
+
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return uint64(rv.Uint()), true
+
+	case reflect.Float32, reflect.Float64:
+		n := reflect.ValueOf(v).Float()
 		if n < 0 {
 			return 0, false
 		}
 		return uint64(n), true
-	case uint, uint8, uint16, uint32, uint64:
-		return reflect.ValueOf(d).Uint(), true
-	case json.Number:
-		if n, err := d.Int64(); err == nil && n >= 0 {
-			return uint64(n), true
+
+	case reflect.String:
+		if n, err := strconv.ParseUint(rv.String(), 10, 64); err == nil {
+			return n, true
 		}
 		return 0, false
-	case string:
-		if i, err := strconv.ParseUint(d, 10, 64); err == nil {
-			return i, true
-		}
-		return 0, false
-	case bool:
-		if d {
+
+	case reflect.Bool:
+		n := rv.Bool()
+		if n {
 			return 1, true
 		}
 		return 0, true
+
 	default:
 		return 0, false
 	}
 }
 
-// AsUIntArray to convert as an array of uint64
-func AsUIntArray(values ...interface{}) ([]uint64, bool) {
+// AsUintArray to convert as an array of uint64
+func AsUintArray(values ...interface{}) ([]uint64, bool) {
 	arr := make([]uint64, len(values))
 	b := true
 	for i, v := range values {
-		if cv, ok := AsUInt(v); ok {
+		if cv, ok := AsUint(v); ok {
 			arr[i] = cv
 			continue
 		}
@@ -192,25 +198,22 @@ func AsUIntArray(values ...interface{}) ([]uint64, bool) {
 
 // AsFloat to convert as a float64
 func AsFloat(v interface{}) (float64, bool) {
-	switch d := v.(type) {
-	case float32, float64:
-		return reflect.ValueOf(d).Float(), true
-	case int, int8, int16, int32, int64:
-		return float64(reflect.ValueOf(d).Int()), true
-	case uint, uint8, uint16, uint32, uint64:
-		return float64(reflect.ValueOf(d).Uint()), true
-	case json.Number:
-		if f, err := d.Float64(); err == nil {
-			return f, true
+	rv := valueOf(v)
+
+	switch rv.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return float64(rv.Int()), true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return float64(rv.Uint()), true
+	case reflect.Float32, reflect.Float64:
+		return rv.Float(), true
+	case reflect.String:
+		if n, err := strconv.ParseFloat(rv.String(), 64); err == nil {
+			return n, true
 		}
 		return 0, false
-	case string:
-		if f, err := strconv.ParseFloat(d, 64); err == nil {
-			return f, true
-		}
-		return 0, false
-	case bool:
-		if d {
+	case reflect.Bool:
+		if n := rv.Bool(); n {
 			return 1, true
 		}
 		return 0, true
@@ -235,25 +238,36 @@ func AsFloatArray(values ...interface{}) ([]float64, bool) {
 
 // AsDatetime to convert as datetime (time.Time)
 func AsDatetime(v interface{}) (time.Time, bool) {
-	switch d := v.(type) {
-	case time.Time:
-		return d.UTC(), true
-	case int, int32, int64: // timestamp compliant with javascript
-		return time.Unix(0, reflect.ValueOf(d).Int()*int64(time.Millisecond)).UTC(), true
-	case string:
+
+	rv := valueOf(v)
+
+	switch rv.Kind() {
+	case reflect.Int, reflect.Int32, reflect.Int64:
+		// timestamp compliant with javascript
+		return time.Unix(0, rv.Int()*int64(time.Millisecond)).UTC(), true
+
+	case reflect.String:
+		str := rv.String()
 		// Try formats
 		for _, format := range DateFormats {
-			if dt, err := time.Parse(format, d); err == nil {
+			if dt, err := time.Parse(format, str); err == nil {
 				return dt.UTC(), true
 			}
 		}
 
 		// Try to convert to int64
-		if ts, err := strconv.ParseInt(d, 10, 64); err == nil {
+		if ts, err := strconv.ParseInt(str, 10, 64); err == nil {
 			return time.Unix(0, ts*int64(time.Millisecond)).UTC(), true
 		}
 
 		return time.Time{}, false
+
+	case reflect.Struct:
+		if c, ok := v.(time.Time); ok {
+			return c.UTC(), true
+		}
+		return time.Time{}, false
+
 	default:
 		return time.Time{}, false
 	}
@@ -275,15 +289,23 @@ func AsDatetimeArray(values ...interface{}) ([]time.Time, bool) {
 
 // AsDuration to convert as a duration
 func AsDuration(v interface{}) (time.Duration, bool) {
-	switch d := v.(type) {
-	case time.Duration:
-		return d, true
-	case int, int8, int16, int32, int64:
-		return time.Duration(reflect.ValueOf(d).Int()), true
-	case float32, float64:
-		return time.Duration(int64(reflect.ValueOf(d).Float())), true
-	case string:
-		if du, err := time.ParseDuration(d); err == nil {
+	rv := valueOf(v)
+
+	switch rv.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return time.Duration(rv.Int()), true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return time.Duration(int64(rv.Uint())), true
+	case reflect.Float32, reflect.Float64:
+		return time.Duration(int64(rv.Float())), true
+
+	case reflect.String:
+		if du, err := time.ParseDuration(rv.String()); err == nil {
+			return du, true
+		}
+		return time.Duration(0), false
+	case reflect.Struct:
+		if du, ok := v.(time.Duration); ok {
 			return du, true
 		}
 		return time.Duration(0), false
