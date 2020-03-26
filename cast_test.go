@@ -67,6 +67,7 @@ func TestAsStringArray(t *testing.T) {
 }
 
 func TestAsInt(t *testing.T) {
+	testInt(t, nil, 0, false)
 	testInt(t, "123", 123, true)
 	testInt(t, "wrong", 0, false)
 	testInt(t, true, 1, true)
@@ -85,17 +86,18 @@ func TestAsInt(t *testing.T) {
 	testInt(t, float64(123), 123, true)
 }
 
-func TestAsUintArray(t *testing.T) {
-	arr, ok := cast.AsUintArray(1, 2, true)
+func TestAsIntArray(t *testing.T) {
+	arr, ok := cast.AsIntArray(1, 2, true)
 	assert.True(t, ok)
-	assert.Equal(t, []uint64{1, 2, 1}, arr)
+	assert.Equal(t, []int64{1, 2, 1}, arr)
 
-	arr, ok = cast.AsUintArray(1, 2, true, "no", -2)
+	arr, ok = cast.AsIntArray(1, 2, true, "no")
 	assert.False(t, ok)
-	assert.Equal(t, []uint64{1, 2, 1, 0, 0}, arr)
+	assert.Equal(t, []int64{1, 2, 1, 0}, arr)
 }
 
 func TestAsUint(t *testing.T) {
+	testUint(t, nil, 0, false)
 	testUint(t, "123", 123, true)
 	testUint(t, "-123", 0, false)
 	testUint(t, "wrong", 0, false)
@@ -121,17 +123,18 @@ func TestAsUint(t *testing.T) {
 	testUint(t, float64(-123), 0, false)
 }
 
-func TestAsIntArray(t *testing.T) {
-	arr, ok := cast.AsIntArray(1, 2, true)
+func TestAsUintArray(t *testing.T) {
+	arr, ok := cast.AsUintArray(1, 2, true)
 	assert.True(t, ok)
-	assert.Equal(t, []int64{1, 2, 1}, arr)
+	assert.Equal(t, []uint64{1, 2, 1}, arr)
 
-	arr, ok = cast.AsIntArray(1, 2, true, "no")
+	arr, ok = cast.AsUintArray(1, 2, true, "no", -2)
 	assert.False(t, ok)
-	assert.Equal(t, []int64{1, 2, 1, 0}, arr)
+	assert.Equal(t, []uint64{1, 2, 1, 0, 0}, arr)
 }
 
 func TestAsFloat(t *testing.T) {
+	testFloat(t, nil, 0, false)
 	testFloat(t, "123", 123, true)
 	testFloat(t, "wrong", 0, false)
 	testFloat(t, true, 1, true)
