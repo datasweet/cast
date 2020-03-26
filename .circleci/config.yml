@@ -5,9 +5,8 @@ jobs:
       - image: circleci/golang:1.14
     steps:
       - checkout
-      - run: go build -v
       - run:
-          name: run tests
+          name: Tests
           command: |
             go fmt ./...
             go vet ./...
